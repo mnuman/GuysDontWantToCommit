@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: An AWS Serverless Specification template describing your function.
+Resources:
+  GuysDontWantToCommit:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: GuysDontWantToCommit/lambda_function.lambda_handler
+      FunctionName: GuysDontWantToCommit
+      Runtime: python3.6
+      Description: 'But let the world know if a guy does commit!'
+      MemorySize: 128
+      Timeout: 15
+      Environment:
+        Variables:
+          YAMMER_GROUP_ID: 15767042
+      CodeUri: .debug/
+      Events:
+        LambdaMicroservice:
+          Type: Api
+          Properties:
+            Path: /github
+            Method: ANY
+  GuysDontWantToCommitPermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName:
+        'Fn::GetAtt':
+          - GuysDontWantToCommit
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        'Fn::Sub': 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:*/*/*/*'
